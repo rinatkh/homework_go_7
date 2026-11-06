@@ -3,16 +3,19 @@ GO ?= go
 PACKAGES := ./...
 SECTIONS := complexity search maps insertdelete simplesort quicksort analysis leetcode
 
-.PHONY: help compile fmt fmt-check vet test test-race ci $(addprefix test-,$(SECTIONS))
+.PHONY: help starter-check compile fmt fmt-check vet test test-race ci $(addprefix test-,$(SECTIONS))
 
 help:
 	@echo "Домашняя работа 7 содержит 40 задач: по пять в каждом разделе."
+	@echo "  make starter-check    - проверить стартовый проект без выполнения TODO tests"
 	@echo "  make compile          - проверить, что стартовые заглушки компилируются"
 	@echo "  make fmt-check        - проверить форматирование"
 	@echo "  make vet              - выполнить go vet"
 	@echo "  make test-<section>   - запустить один раздел"
 	@echo "  make test             - запустить все тесты; до решения они красные"
 	@echo "  make ci               - полная проверка готового решения"
+
+starter-check: compile fmt-check vet
 
 compile:
 	$(GO) test -run '^$$' $(PACKAGES)
