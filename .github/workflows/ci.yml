@@ -1,0 +1,69 @@
+name: Homework 7 CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  GOTOOLCHAIN: local
+  CGO_ENABLED: '1'
+
+jobs:
+  starter:
+    name: Starter and runnable examples
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Получить код
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Установить Go из go.mod
+        uses: actions/setup-go@v7
+        with:
+          go-version-file: go.mod
+          cache: false
+
+      - name: Показать версию Go
+        run: go version
+
+      - name: Проверить компиляцию, формат, vet и восемь cmd
+        run: make starter-check
+
+      - name: Проверить demos с race detector
+        run: go test -race ./internal/demo ./test/integration
+
+      - name: Собрать все пакеты и команды
+        run: go build ./...
+
+  solution:
+    name: Full solution tests and race
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Получить код
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Установить Go из go.mod
+        uses: actions/setup-go@v7
+        with:
+          go-version-file: go.mod
+          cache: false
+
+      - name: Показать версию Go
+        run: go version
+
+      # До решения TODO этот job ожидаемо красный; ошибки не подавляются.
+      - name: Проверить полное решение по исходным контрактам
+        run: make ci
